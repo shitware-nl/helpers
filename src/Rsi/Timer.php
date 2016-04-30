@@ -15,6 +15,7 @@ class Timer{
    */
   public function stop(){
     if($this->_id) $this->times[$this->_id] += microtime(true) - $this->_start;
+    $this->_id = null;
   }
   /**
    *  Start a timer.

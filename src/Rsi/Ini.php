@@ -36,7 +36,7 @@ class Ini{
     if(!is_array($value = $data)){
       if($mode == INI_SCANNER_TYPED){
         if($value === null) $value = 'null';
-        elseif(is_bool($value)) $value = $value ? 'true' : 'false';
+        elseif(is_bool($value)) $value = Str::bool($value);
       }
       return "$prefix = $value\n";
     }

@@ -48,12 +48,13 @@ class Record{
    *  @return mixed  Found value, or default value if the key does not exist.
    */
   public static function get($array,$key,$default = null){
-    if(($key === []) || !is_array($array)) return $default;
-    if(is_array($keys = $key)) $key = array_shift($keys);
-    else $keys = null;
-    if(!array_key_exists($key,$array)) return $default;
-    $value = $array[$key];
-    return $keys ? self::get($value,$keys,$default) : $value;
+    if(!is_array($key)) $key = [$key];
+    elseif(!$key) return $default;
+    while($key){
+      if(!is_array($array) || !array_key_exists($sub = array_shift($key),$array)) return $default;
+      $array = $array[$sub];
+    }
+    return $array;
   }
   /**
    *  Get a value from an array in a case insensitive way.
@@ -65,20 +66,24 @@ class Record{
    *  @return mixed  Found value, or default value if the key does not exist.
    */
   public static function iget($array,$key,$default = null){
-    if(($key === []) || !is_array($array)) return $default;
-    if(is_array($keys = $key)) $key = array_shift($keys);
-    else $keys = null;
-    if(array_key_exists($key,$array)){
-      $value = $array[$key];
-      return $keys ? self::iget($value,$keys,$default) : $value;
+    if(!is_array($key)) $key = [$key];
+    elseif(!$key) return $default;
+    while($key){
+      if(!is_array($array)) return $default;
+      if(!array_key_exists($sub = array_shift($key),$array)){
+        $found = false;
+        foreach($array as $index => $value) if($found = !strcasecmp($index,$sub)){
+          $sub = $index;
+          break;
+        }
+        if(!$found) return $default;
+      }
+      $array = $array[$sub];
     }
-    else foreach($array as $index => $value)
-      if(!strcasecmp($index,$key))
-        return $keys ? self::iget($value,$keys,$default) : $value;
-    return $default;
+    return $array;
   }
   /**
-   *  Put a value into an array.
+   *  Set a value of an array.
    *  If the key does not exist it will be created. With a nested key, sub-array will also be created.
    *  @param array $array  Array to store the value in.
    *  @param string|array $key  Key to store the value at. An array indicates a nested key. If the array is
@@ -88,9 +93,43 @@ class Record{
   public static function set(&$array,$key,$value){
     if(is_array($keys = $key)) $key = array_shift($keys);
     else $keys = null;
-    if(!array_key_exists($key,$array)) $array[$key] = [];
-    if($keys) self::set($array[$key],$keys,$value);
+    if($keys){
+      if(!array_key_exists($key,$array)) $array[$key] = [];
+      self::set($array[$key],$keys,$value);
+    }
     else $array[$key] = $value;
+  }
+  /**
+   *  Add a value to an array if the key does not already exist.
+   *  @param array $array  Array to store the value in.
+   *  @param string|array $key  Key to store the value at. An array indicates a nested key. If the array is
+   *    ['foo' => ['bar' => 'acme']], then the nested key for the 'acme' value will be ['foo','bar'].
+   *  @param mixed $value
+   */
+  public static function add(&$array,$key,$value = null){
+    if(is_array($keys = $key)) $key = array_shift($keys);
+    else $keys = null;
+    if(!array_key_exists($key,$array)) $array[$key] = $keys ? [] : $value;
+    if($keys) self::add($array[$key],$keys,$value);
+  }
+  /**
+   *  Get the n-th value from an array.
+   *  @param array $array  Array to get value from.
+   *  @param int $index  Value index.
+   *  @param mixed $default  Default value if the index does not exist.
+   *  @return mixed
+   */
+  public static function value($array,$index = 0,$default = null){
+    return self::get(array_values($array),$index,$default);
+  }
+  /**
+   *  Get the n-th key from an array.
+   *  @param array $array  Array to get key from.
+   *  @param int $index  Key index.
+   *  @return mixed  Found key, false if not existing.
+   */
+  public static function key($array,$index = 0){
+    return self::get(array_keys($array),$index,false);
   }
   /**
    *  Determine if an array is associative (that is, no ascending numerical key).

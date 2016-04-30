@@ -16,6 +16,14 @@ class Str{
   const TRANSFORM_UPPER = 'upper';
 
   /**
+   *  Returns literally 'true' or 'false'.
+   *  @param bool $value
+   *  @return string
+   */
+  public static function bool($value){
+    return $value ? 'true' : 'false';
+  }
+  /**
    *  Generate a random string.
    *  @param int $length  Length of the resulting string.
    *  @param string $chars  Characters to use. Ranges can be indicated as [{from}-{to}]. Eg '[0-9][a-f]' for the hexadecimal
@@ -31,7 +39,7 @@ class Str{
       }
     $max = strlen($chars) - 1;
     $result = '';
-    while($length--) $result .= $chars[mt_rand(0,$max)];
+    while($length--) $result .= $chars[\Rsi::version(7) ? random_int(0,$max) : mt_rand(0,$max)];
     return $result;
   }
   /**
@@ -204,9 +212,20 @@ class Str{
       case '*-': return self::startsWith($ref,$value);
       case '-*': return self::endsWith($ref,$value);
       case '*':  return strpos($ref,$value) !== false;
-      case '//': return preg_match('/' . $value . '/',$ref);
+      case '//': return preg_match(substr($value,0,1) == '/' ? $value : '/' . $value . '/',$ref);
     }
     return $default;
+  }
+  /**
+   *  Convert an array to a list.
+   *  @param array $array  Array with list items.
+   *  @param string $last_delimiter  Delimiter for the last item (same as delimiter when empty).
+   *  @param string $delimiter  Delimiter for the items.
+   *  @return string
+   */
+  public static function list($array,$last_delimiter = null,$delimiter = ', '){
+    $last = array_pop($array);
+    return $array ? implode($delimiter,$array) . ($last_delimiter ?: $delimiter) . $last : $last;
   }
   /**
    *  Show ranges from a numerical array.
