@@ -223,7 +223,7 @@ class Str{
    *  @param string $delimiter  Delimiter for the items.
    *  @return string
    */
-  public static function list($array,$last_delimiter = null,$delimiter = ', '){
+  public static function implode($array,$last_delimiter = null,$delimiter = ', '){
     $last = array_pop($array);
     return $array ? implode($delimiter,$array) . ($last_delimiter ?: $delimiter) . $last : $last;
   }
