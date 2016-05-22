@@ -126,10 +126,11 @@ class File{
   /**
    *  Unserialize the content of a file.
    *  @param string $filename  File to read from.
+   *  @param mixed $default  Value to return if the file does not exist.
    *  @return mixed  Unserialized data.
    */
-  public static function unserialize($filename){
-    return unserialize(file_get_contents($filename));
+  public static function unserialize($filename,$default = false){
+    return file_exists($filename) ? unserialize(file_get_contents($filename)) : $default;
   }
   /**
    *  Encode data to JSON and write it to a file.
@@ -143,9 +144,11 @@ class File{
   /**
    *  Decode the JSON content of a file.
    *  @param string $filename  File to read from.
+   *  @param mixed $default  Value to return if the file does not exist.
+   *  @param bool $assoc  When true, returned objects will be converted into assoc.arrays.
    *  @return mixed  Decoded data.
    */
-  public static function jsonDecode($filename,$assoc = true){
+  public static function jsonDecode($filename,$default = false,$assoc = true){
     return json_decode(file_get_contents($filename),$assoc);
   }
   /**
