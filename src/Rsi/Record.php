@@ -176,6 +176,25 @@ class Record{
     return $result;
   }
   /**
+   *  Combine the key and value of an assoc.array into seperate records.
+   *  @param array $array  Assoc.array.
+   *  @param string $key_name  Name under which the key is added to the record. If empty the key is not added.
+   *  @param string $value_name  Name under which the value is added to the record. If empty, and the value is an array, this
+   *    array is merged with the record. Otherwise the value is not added.
+   *  @return array  Array of records (key is preserved).
+   */
+  public static function combine($array,$key_name = null,$value_name = null){
+    $records = [];
+    foreach($array as $key => $value){
+      $record = [];
+      if($key_name) $record[$key_name] = $key;
+      if($value_name) $record[$value_name] = $value;
+      elseif(is_array($value)) $record += $value;
+      $records[$key] = $record;
+    }
+    return $records;
+  }
+  /**
    *  Return the values from a single column in the input array.
    *  Basicly PHP's array_column, but then retaining key association.
    *  @param array $array  A multi-dimensional array (record set) from which to pull a column of values.
