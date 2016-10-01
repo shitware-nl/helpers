@@ -169,16 +169,18 @@ class File{
    *  @param array $filters  Array with filters. Key = filter (see FIND_FILTER_* constants) plus optional operator (see
    *    Str::operator()), value = value to compare to.
    *  @param bool $recursive  True to do a recursive search.
-   *  @return array  Key = full name, value = info gathered for the filtering (key = filter key, value = entry value).
+   *  @return array  Key = full name, value = info gathered for the filtering (key = filter key, value = entry value). False if
+   *    path is not a directory.
    */
   public static function find($path,$filters = null,$recursive = false){
+    if(!is_dir($path)) return false;
     $dir = dir($path = self::addDirSeparator($path));
     if(!$filters) $filters = [];
     if(!array_key_exists(self::FIND_FILTER_TYPE,$filters)) $filters[self::FIND_FILTER_TYPE] = self::FIND_TYPE_FILE;
-    $result = [];
+    $files = [];
     while(($entry = $dir->read()) !== false) if(trim($entry,'.') !== '') try{
       $info = ['dir' => $is_dir = is_dir($full = $path . $entry)];
-      if($is_dir && $recursive) $result += self::find($full,$filters,$recursive);
+      if($is_dir && $recursive) $files += self::find($full,$filters,$recursive);
       foreach($filters as $key => $value){
         if($operator = preg_match('/^(\\w+)(\\W+)$/',$key,$match) ? $match[2] : null) $key = $match[1];
         else $operator = '==';
@@ -202,23 +204,23 @@ class File{
             break;
         }
       }
-      $result[$full] = $info;
+      $files[$full] = $info;
     }
     catch(\Exception $e){}
     $dir->close();
-    return $result;
+    return $files;
   }
   /**
    *  Find files.
    *  @param string $path  Base path.
    *  @param string $pattern  Filename pattern (with '*' and '?' as possible wildcards).
    *  @param bool $recursive  True to do a recursive search.
-   *  @return array  Full names.
+   *  @return array  Full names. False if path is not a directory.
    */
   public static function dir($path,$pattern = null,$recursive = false){
     $filters = [self::FIND_FILTER_TYPE => self::FIND_TYPE_FILE];
     if($pattern) $filters[self::FIND_FILTER_NAME . '//'] = '/^' . strtr(preg_quote($pattern,'/') . '$/i',['\\*' => '.*','\\?' => '.']);
-    return array_keys(self::find($path,$filters,$recursive));
+    return ($files = self::find($path,$filters,$recursive)) ? array_keys($files) : $files;
   }
 
 }

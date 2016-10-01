@@ -115,21 +115,21 @@ class Record{
   /**
    *  Get the n-th value from an array.
    *  @param array $array  Array to get value from.
-   *  @param int $index  Value index.
+   *  @param int $index  Value index (negative = start from end).
    *  @param mixed $default  Default value if the index does not exist.
    *  @return mixed
    */
   public static function value($array,$index = 0,$default = null){
-    return self::get(array_values($array),$index,$default);
+    return self::get(array_values($array),$index + ($index < 0 ? count($array) : 0),$default);
   }
   /**
    *  Get the n-th key from an array.
    *  @param array $array  Array to get key from.
-   *  @param int $index  Key index.
+   *  @param int $index  Key index (negative = start from end).
    *  @return mixed  Found key, false if not existing.
    */
   public static function key($array,$index = 0){
-    return self::get(array_keys($array),$index,false);
+    return self::get(array_keys($array),$index + ($index < 0 ? count($array) : 0),false);
   }
   /**
    *  Determine if an array is associative (that is, no ascending numerical key).
@@ -204,6 +204,19 @@ class Record{
   public static function column($array,$column){
     $result = [];
     foreach($array as $key => $record) $result[$key] = self::get($record,$column);
+    return $result;
+  }
+  /**
+   *  Shuffle an array.
+   *  Basicly PHP's shuffle, but then retaining key association (and not altering the input array).
+   *  @param array $array  Input array.
+   *  @return array  Shuffled array.
+   */
+  public static function shuffle($array){
+    $result = [];
+    $keys = array_keys($array);
+    shuffle($keys);
+    foreach($keys as $key) $result[$key] = $array[$key];
     return $result;
   }
   /**
