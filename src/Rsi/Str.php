@@ -97,8 +97,8 @@ class Str{
    */
   public static function limit($str,$length,$words = false,$delimiter = '…'){
     if(mb_strlen($str) > $length){
-      if(!$words) $str = substr($str,0,$length - mb_strlen($delimiter));
-      else while(mb_strlen($str . $delimiter) > $length) $str = preg_replace('/\\w*\\s*$/','',$str);
+      if(!$words) $str = mb_substr($str,0,$length - mb_strlen($delimiter));
+      else while($str && (mb_strlen($str . $delimiter) > $length)) $str = substr($str,0,strrpos($str,' ') + 1);
       $str .= $delimiter;
     }
     return $str;
@@ -186,6 +186,15 @@ class Str{
    */
   public static function endsWith($haystack,$needle){
     return substr($haystack,-strlen($needle)) == $needle;
+  }
+  /**
+   *  Numeric detection.
+   *  Works only on decimal numbers, plus signs and exponential parts are not allowed.
+   *  @param mixed $value  Value to check.
+   *  @return bool  True if the value is a numeric.
+   */
+  public static function numeric($value){
+    return is_string($value) && preg_match('/^(\\-?[1-9]\\d*|0)(\\.\\d+)?$/',$value);
   }
   /**
    *  Evaluate an operator between a value and a reference value.

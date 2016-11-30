@@ -130,7 +130,7 @@ class File{
    *  @return mixed  Unserialized data.
    */
   public static function unserialize($filename,$default = false){
-    return file_exists($filename) ? unserialize(file_get_contents($filename)) : $default;
+    return is_file($filename) ? unserialize(file_get_contents($filename)) : $default;
   }
   /**
    *  Encode data to JSON and write it to a file.
@@ -149,7 +149,7 @@ class File{
    *  @return mixed  Decoded data.
    */
   public static function jsonDecode($filename,$default = false,$assoc = true){
-    return json_decode(file_get_contents($filename),$assoc);
+    return is_file($filename) ? json_decode(file_get_contents($filename),$assoc) : $default;
   }
   /**
    *  Get MIME type for a file.

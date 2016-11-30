@@ -136,5 +136,45 @@ class Http{
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0'); //HTTP/1.1
     header('Pragma: public'); //HTTP/1.0
   }
+  /**
+   *  Get content from URL.
+   *  @param string $url  URL to make request to.
+   *  @param array $post  Data to post with request (key =&gt; value pairs).
+   *  @param array $headers  Extra HTTP headers to add to request (key = header name, value = header value).
+   *  @param array $options  Extra cURL options (key = option name, value = option value).
+   *  @param int $timeout  Request timeout in seconds.
+   *  @param int max_redirs  Maximum number of redirections to follow.
+   *  @return mixed  Response text if susccessful (200) or false if not found (404). Exceptions thrown on cURL error or other
+   *    response codes.
+   */
+  public static function urlGetContents($url,$post = null,$headers = null,$options = null,$timeout = null,$max_redirs = null){
+    $ch = curl_init($url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    if($post){
+      curl_setopt($ch,CURLOPT_POST,true);
+      curl_setopt($ch,CURLOPT_POSTFIELDS,$post);
+    }
+    if($headers){
+      foreach($headers as $key => &$value) $vaue = $key . ': ' . $value;
+      unset($value);
+      curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
+    }
+    if($options) curl_setopt_array($ch,$options);
+    curl_setopt($ch,CURLOPT_TIMEOUT,$timeout ?: ini_get('default_socket_timeout'));
+    if($max_redirs){
+      curl_setopt($ch,CURLOPT_FOLLOWLOCATION,true);
+      curl_setopt($ch,CURLOPT_MAXREDIRS,$max_redirs);
+    }
+    $result = curl_exec($ch);
+    $message = ($error = curl_errno($ch)) ? curl_error($ch) : null;
+    $code = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if($error) throw new \Exception("cURL error: $message ($error)");
+    switch($code){
+      case 200: return $result;
+      case 404: return false;
+      default: throw new \Exception("unexpected response ($code): $result");
+    }
+  }
 
 }
