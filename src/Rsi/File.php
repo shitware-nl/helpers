@@ -91,7 +91,7 @@ class File{
   /**
    *  Optimistic filemtime (no need to check file_exists() first).
    *  @param string $filename  File to get modification time for.
-   *  @param int  Last modification time. False if file does not exists.
+   *  @return int  Last modification time. False if file does not exists.
    */
   public static function mtime($filename){
     try{
@@ -136,6 +136,7 @@ class File{
    *  Encode data to JSON and write it to a file.
    *  @param string $filename  File to write to.
    *  @param mixed $data  Data to decode and save.
+   *  @param int $options  PHP's json_encode options.
    *  @return int  Number of bytes written or false on error.
    */
   public static function jsonEncode($filename,$data,$options = JSON_PRETTY_PRINT){
@@ -174,10 +175,10 @@ class File{
    */
   public static function find($path,$filters = null,$recursive = false){
     if(!is_dir($path)) return false;
-    $dir = dir($path = self::addDirSeparator($path));
     if(!$filters) $filters = [];
     if(!array_key_exists(self::FIND_FILTER_TYPE,$filters)) $filters[self::FIND_FILTER_TYPE] = self::FIND_TYPE_FILE;
     $files = [];
+    $dir = dir($path = self::addDirSeparator($path));
     while(($entry = $dir->read()) !== false) if(trim($entry,'.') !== '') try{
       $info = ['dir' => $is_dir = is_dir($full = $path . $entry)];
       if($is_dir && $recursive) $files += self::find($full,$filters,$recursive);

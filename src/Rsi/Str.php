@@ -79,7 +79,7 @@ class Str{
     return str_replace(str_split($delimiters),'',ucwords($str,$delimiters));
   }
   /**
-   *  Converts a CamelCased string to snail_case.
+   *  Converts a CamelCased string to snake_case.
    *  @param string $str  CamelCased string.
    *  @param string $delimiter  Delimiter to put between the words.
    *  @return string
@@ -253,6 +253,21 @@ class Str{
         if($start != $end) $result[] = $end;
       }
     return implode($delimiter,$result);
+  }
+  /**
+   *  Replace date tags in a string.
+   *  @param string $str  String with date tags.
+   *  @param int $time  Timestamp to use (empty = now).
+   *  @param string $open  Open tag.
+   *  @param string $close  Close tag.
+   *  @return string  String with tags replaced.
+   */
+  public static function replaceDate($str,$time = null,$open = '[',$close = ']'){
+    if(preg_match_all('/' . preg_quote($open,'/') . '(\w+)' . preg_quote($close,'/') . '/',$str,$matches,PREG_SET_ORDER)){
+      if(!$time) $time = time();
+      foreach($matches as $match) $str = str_replace($match[0],date($match[1],$time),$str);
+    }
+    return $str;
   }
 
 }

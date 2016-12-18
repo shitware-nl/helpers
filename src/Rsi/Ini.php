@@ -30,7 +30,6 @@ class Ini{
    *  @param mixed $data  Value (single or array).
    *  @param int $mode  INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED.
    *  @return string
-   *  @see http://php.net/parse_ini_file
    */
   protected static function stringEncode($prefix,$data,$mode){
     if(!is_array($value = $data)){
@@ -47,12 +46,10 @@ class Ini{
   }
   /**
    *  Write a configuration string.
-   *  @param string $filename  The filename of the ini file.
    *  @param array $data  Multidimensional array.
    *  @param bool $sections  Use sections (first evel of data).
    *  @param int $mode  INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED.
    *  @return string
-   *  @see http://php.net/parse_ini_file
    */
   public static function toString($data,$sections = true,$mode = INI_SCANNER_TYPED){
     if(!$sections) return self::stringEncode(null,$data,$mode);
@@ -70,7 +67,6 @@ class Ini{
    *  @param bool $sections  Use sections (first evel of data).
    *  @param int $mode  INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED.
    *  @return int  Bytes written (false on failure).
-   *  @see http://php.net/parse_ini_file
    */
   public static function toFile($filename,$data,$sections = true,$mode = INI_SCANNER_TYPED){
     return file_put_contents($filename,self::toString($data,$sections,$mode));

@@ -143,7 +143,7 @@ class Http{
    *  @param array $headers  Extra HTTP headers to add to request (key = header name, value = header value).
    *  @param array $options  Extra cURL options (key = option name, value = option value).
    *  @param int $timeout  Request timeout in seconds.
-   *  @param int max_redirs  Maximum number of redirections to follow.
+   *  @param int $max_redirs  Maximum number of redirections to follow.
    *  @return mixed  Response text if susccessful (200) or false if not found (404). Exceptions thrown on cURL error or other
    *    response codes.
    */

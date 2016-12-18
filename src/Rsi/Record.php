@@ -3,7 +3,7 @@
 namespace Rsi;
 
 /**
- *  Record (array) hulpfuncties.
+ *  Record (array) helpers.
  */
 class Record{
 
@@ -17,9 +17,9 @@ class Record{
   public static function explode($array,$delimiter = null,$separator = null){
     if(is_array($array)) return $array;
     if($array === null) return [];
-    if(!$delimiter) return [$array];
+    if(!$delimiter || !is_string($array)) return $array === null ? [] : [$array];
     $result = [];
-    foreach(explode($delimiter,$array) as $value){
+    if($array) foreach(explode($delimiter,$array) as $value){
       if($separator) list($key,$value) = explode($separator,$value,2);
       else $key = count($result);
       $result[$key] = $value;
@@ -38,6 +38,22 @@ class Record{
     if($separator) foreach($array as $key => &$value) $value = $key . $separator . $value;
     unset($value);
     return implode($delimiter,$array);
+  }
+  /**
+   *  Checks if a key exists in an array.
+   *  @param array $array  Array to look in.
+   *  @param string|array $key  Key to look at. An array indicates a nested key. If the array is ['foo' => ['bar' => 'acme']],
+   *    then the nested key for the 'acme' value will be ['foo','bar'].
+   *  @return bool  True if the key exists.
+   */
+  public static function exists($array,$key){
+    if(!is_array($key)) $key = [$key];
+    elseif(!$key) return false;
+    while($key){
+      if(!is_array($array) || !array_key_exists($sub = array_shift($key),$array)) return false;
+      $array = $array[$sub];
+    }
+    return true;
   }
   /**
    *  Get a value from an array.
@@ -113,6 +129,20 @@ class Record{
     if($keys) self::add($array[$key],$keys,$value);
   }
   /**
+   *  Delete a (nested) key from an array.
+   *  @param array $array  Array to delete the key from.
+   *  @param string|array $key  Key to delete. An array indicates a nested key.
+   */
+  public static function delete(&$array,$key){
+    if(is_array($keys = $key)){
+      $key = array_pop($keys);
+      foreach($keys as $sub)
+        if(array_key_exists($sub,$array)) $array = &$array[$sub];
+        else return false;
+    }
+    unset($array[$key]);
+  }
+  /**
    *  Get the n-th value from an array.
    *  @param array $array  Array to get value from.
    *  @param int $index  Value index (negative = start from end).
@@ -138,6 +168,27 @@ class Record{
    */
   public static function assoc($array){
     return array_values($array) !== $array;
+  }
+  /**
+   *  Set the length of an array.
+   *  @param array $array  Input array.
+   *  @param int $length  Desired length.
+   *  @param mixed $filler  Value for new possible entries.
+   *  @return array  Input array with its length chopped or extended.
+   */
+  public static function resize($array,$length,$filler = null){
+    return array_slice(array_pad($array,$length,$filler),0,$length);
+  }
+  /**
+   *  Creates an array by using one array for keys and another for its values.
+   *  Basicly PHP's array_combine, but then without the same length restriction.
+   *  @param array $keys  Array of keys.
+   *  @param array $values  Array of values.
+   *  @param mixed $filler  Filler to use if array of values is shorter than keys.
+   *  @return array  Combined array.
+   */
+  public static function combine($keys,$values,$filler = null){
+    return array_combine($keys,self::resize($values,count($keys),$filler));
   }
   /**
    *  Add a prefix to all members of an array.
@@ -176,14 +227,14 @@ class Record{
     return $result;
   }
   /**
-   *  Combine the key and value of an assoc.array into seperate records.
+   *  Merge the key and value of an assoc.array into a record.
    *  @param array $array  Assoc.array.
    *  @param string $key_name  Name under which the key is added to the record. If empty the key is not added.
    *  @param string $value_name  Name under which the value is added to the record. If empty, and the value is an array, this
    *    array is merged with the record. Otherwise the value is not added.
    *  @return array  Array of records (key is preserved).
    */
-  public static function combine($array,$key_name = null,$value_name = null){
+  public static function mergeKey($array,$key_name = null,$value_name = null){
     $records = [];
     foreach($array as $key => $value){
       $record = [];
