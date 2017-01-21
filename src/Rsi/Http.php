@@ -108,6 +108,27 @@ class Http{
     return $lang;
   }
   /**
+   *  Exand an abbreviated IPv6 address to its full representation.
+   *  @param string $addr  Basic address.
+   *  @return string  Expanded address (IPv4 addresses ae untouched).
+   */
+  public static function expandAddr($addr){
+    if(count($groups = explode(':',$addr)) > 1){
+      $addr = [];
+      foreach($groups as $index => $group) if(!$index || $group) $addr[] = Str::pad($group,4);
+      else $addr = array_merge($addr,array_fill(0,9 - count($groups),'0000'));
+      $addr = implode(':',$addr);
+    }
+    return $addr;
+  }
+  /**
+   *  Returns the expanded, remote address (if available).
+   *  @return string
+   */
+  public static function remoteAddr(){
+    return self::expandAddr(Record::get($_SERVER,'REMOTE_ADDR'));
+  }
+  /**
    *  Check if an IP-adres lies within a certain subnet.
    *  @param string $subnet  Semicolon separated list of IP-adresses. Within these address an asterisk may be used to indicate a
    *    group of alphanumeric characters. Regular expression notation is also allowed for this (eg '[1-4]', '\\d', '\\w'). Dots
@@ -116,9 +137,9 @@ class Http{
    *  @return bool
    */
   public static function inSubnet($subnet,$remote_addr = null){
-    return preg_match(
-      '/^(' . strtr($subnet,['.' => '\.',':' => '\:',';' => '|','*' => '\w+']) . ')$/',
-      $remote_addr ?: Record::get($_SERVER,'REMOTE_ADDR')
+    return (bool)preg_match(
+      '/^(' . strtr($subnet,['.' => '\.','::' => '(0+:)+0*',':' => '\:0*',';' => '|','*' => '\w+']) . ')$/',
+      $remote_addr ?: self::expandAddr(Record::get($_SERVER,'REMOTE_ADDR'))
     );
   }
   /**
@@ -175,6 +196,14 @@ class Http{
       case 404: return false;
       default: throw new \Exception("unexpected response ($code): $result");
     }
+  }
+  /**
+   *  Check an e-mail address for syntax and host.
+   *  @param string $mail  E-mail address.
+   *  @return bool  True if both the e-mail address and the host are valid.
+   */
+  public static function checkEmail($email){
+    return filter_var($email,FILTER_VALIDATE_EMAIL) && checkdnsrr(substr(strrchr($email,'@'),1));
   }
 
 }
