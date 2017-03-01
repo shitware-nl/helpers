@@ -39,7 +39,6 @@ class Http{
     $host = Record::get($_SERVER,'SERVER_NAME') ?: php_uname('n');
     if($complete){
       $host = (($secure = self::secure()) ? 'https' : 'http') . '://' . $host;
-      $default = $secure ? 443 : 80;
       if(($port = Record::get($_SERVER,'SERVER_PORT')) && ($port != ($secure ? 443 : 80))) $host .= ':' . $port;
     }
     return $host;

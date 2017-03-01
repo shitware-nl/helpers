@@ -59,13 +59,5 @@ class Rsi{
     }
     return number_format($size,$decimals,$dec_point,$thousands_sep) . $unit_sep . $unit;
   }
-  /**
-   *  Check wether a name is a valid XML tag name.
-   *  @param string $name  Tag name.
-   *  @return bool  True if valid.
-   */
-  public static function validXmlTag($name){
-    return !preg_match('/(^[\\.\\-\\d]|^xml|[' . preg_quote('!"#$%&\'()*+,/;<=>?@[\\]^`{|}~','/') . '\\s])/i',$name);
-  }
 
 }
