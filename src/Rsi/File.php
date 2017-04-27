@@ -43,8 +43,8 @@ class File{
    *  @return string  Name of the directory of the given path.
    */
   public static function dirname($path,$levels = 1){
-    $path = substr($path,0,max(strrpos($path,'/'),strrpos($path,'\\')));
-    return --$levels ? self::dirname($path,$levels) : $path;
+    while($levels-- && $path) $path = substr($path,0,max(strrpos($path,'/'),strrpos($path,'\\')));
+    return $path;
   }
   /**
    *  Basename that does not care about separator, and also removes possible query parameters.

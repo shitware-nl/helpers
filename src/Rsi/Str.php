@@ -15,6 +15,8 @@ class Str{
   const TRANSFORM_UCWORDS = 'ucwords';
   const TRANSFORM_UPPER = 'upper';
 
+  const ATTRIBUTES_PATTERN = '\s+(?<key>\w+)=(\'([^\']*)\'|"([^"]*)"|(\w+))';
+
   /**
    *  Returns literally 'true' or 'false'.
    *  @param bool $value
@@ -115,16 +117,28 @@ class Str{
     return $result;
   }
   /**
-   *  Return part of a string until a needle.
+   *  Return part of a string after a needle. Shorten the string including the needle.
    *  @param string $haystack  String to search in.
    *  @param string $needle  Needle to look for (not found = return string until end).
-   *  @param int $skip  Number of parts/needles to skip.
-   *  @return string  Part of string until the needle.
+   *  @return string  Part of string after the needle (false if needle not found).
    */
-  public static function part($haystack,$needle,$skip = 0){
-    $result = false;
-    while($skip-- >= 0) $result = self::strip($haystack,$needle);
+  public static function pop(&$haystack,$needle){
+    $i = strrpos($haystack,$needle);
+    if($i === false) return false;
+    $result = substr($haystack,$i + 1);
+    $haystack = substr($haystack,0,$i);
     return $result;
+  }
+  /**
+   *  Return part of a string until a needle.
+   *  @param string $haystack  String to search in.
+   *  @param string $needle  Needle to look for.
+   *  @param int $index  Number of parts/needles to skip.
+   *  @return string  Part of string until the needle (false = index not found).
+   */
+  public static function part($haystack,$needle,$index = 0){
+    $parts = explode($needle,$haystack);
+    return $index < count($parts) ? $parts[$index] : false;
   }
   /**
    *  Insert a string at a certain position in another string.
@@ -268,6 +282,17 @@ class Str{
       foreach($matches as $match) $str = str_replace($match[0],date($match[1],$time),$str);
     }
     return $str;
+  }
+  /**
+   *  Extract attributes from a string.
+   *  @param string $str  String with attributes.
+   *  @return array  Attributes (assoc. array).
+   */
+  public static function attributes($str){
+    $attribs = [];
+    if($str && preg_match_all('/' . self::ATTRIBUTES_PATTERN . '/',$str,$matches,PREG_SET_ORDER))
+      foreach($matches as $match) $attribs[$match['key']] = html_entity_decode(array_pop($match));
+    return $attribs;
   }
 
 }

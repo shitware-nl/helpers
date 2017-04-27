@@ -59,5 +59,20 @@ class Rsi{
     }
     return number_format($size,$decimals,$dec_point,$thousands_sep) . $unit_sep . $unit;
   }
+  /**
+   *  Format a number as a Roman number.
+   *  @param int $value  Decimal value.
+   *  @return string  Roman representation.
+   */
+  public static function romanNumber($value){
+    $result = '';
+    $numbers = ['M' => 1000,'CM' => 900,'D' => 500,'CD' => 400,'C' => 100,'XC' => 90,'L' => 50,'XL' => 40,'X' => 10,'IX' => 9,'V' => 5,'IV' => 4,'I' => 1];
+    while($value > 0) foreach($numbers as $roman => $number) if($value >= $number){
+      $value -= $number;
+      $result .= $roman;
+      break;
+    }
+    return $result;
+  }
 
 }

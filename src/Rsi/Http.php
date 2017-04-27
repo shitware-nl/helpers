@@ -148,7 +148,7 @@ class Http{
    *  @param int $size  Size of the download (gives user progress indication).
    */
   public static function downloadHeaders($filename,$content_type = null,$size = null){
-    header('Content-Type: ' . ($content_type ?: 'application/' . File::ext($filename)));
+    header('Content-Type: ' . ($content_type ?: mime_content_type($filename)));
     header('Content-Transfer-Encoding: binary');
     header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
     if($size !== null) header('Content-Length: ' . $size);
@@ -175,7 +175,7 @@ class Http{
       curl_setopt($ch,CURLOPT_POSTFIELDS,$post);
     }
     if($headers){
-      foreach($headers as $key => &$value) $vaue = $key . ': ' . $value;
+      foreach($headers as $key => &$value) $value = $key . ': ' . $value;
       unset($value);
       curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
     }
@@ -198,7 +198,7 @@ class Http{
   }
   /**
    *  Check an e-mail address for syntax and host.
-   *  @param string $mail  E-mail address.
+   *  @param string $email  E-mail address.
    *  @return bool  True if both the e-mail address and the host are valid.
    */
   public static function checkEmail($email){
