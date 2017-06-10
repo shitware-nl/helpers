@@ -191,6 +191,18 @@ class Record{
     return array_combine($keys,self::resize($values,count($keys),$filler));
   }
   /**
+   *  Searches the array for a given value and returns the first corresponding key if successful.
+   *  Basicly PHP's array_search, but case insensitive.
+   *  @param array $array  Array with values.
+   *  @param mixed $value  Value to look for.
+   *  @return mixed  Key if found, otherwise false.
+   */
+  public static function isearch($array,$value){
+    $value = mb_strtolower($value);
+    foreach($array as $key => $sub) if(mb_strtolower($sub) == $value) return $key;
+    return false;
+  }
+  /**
    *  Add a prefix to all members of an array.
    *  @param array $array  Array with values.
    *  @param string $prefix  Prefix to add.

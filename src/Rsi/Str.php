@@ -41,7 +41,8 @@ class Str{
       }
     $max = strlen($chars) - 1;
     $result = '';
-    while($length--) $result .= $chars[\Rsi::version(7) ? random_int(0,$max) : mt_rand(0,$max)];
+    $random_int = function_exists('random_int');
+    while($length--) $result .= $chars[$random_int ? random_int(0,$max) : rand(0,$max)];
     return $result;
   }
   /**
@@ -55,10 +56,21 @@ class Str{
   /**
    *  Transform a string to a URL-friendly version.
    *  @param string $str  Original string.
+   *  @param string $replace  Character to replace non 'word' characters by.
    *  @return string  URL-friendly string.
    */
-  public static function urlify($str){
-    return preg_replace('/\\W+/','-',self::normalize($str));
+  public static function urlify($str,$replace = '-'){
+    return strtolower(trim(preg_replace('/\\W+/',$replace,self::normalize($str)),$replace));
+  }
+  /**
+   *  Case insesitive string comparison.
+   *  @param string $str1  First string.
+   *  @param string $str2  Second string.
+   *  @return  Returns < 0 if str1 is less than str2, > 0 if str1 is greater than str2, and 0 if they are equal.
+   *
+   */
+  public static function icompare($str1,$str2){
+    return strcmp(mb_strtolower($str1),mb_strtolower($str2));
   }
   /**
    *  Pad function that defaults to left padding with zeros.
@@ -99,8 +111,8 @@ class Str{
    */
   public static function limit($str,$length,$words = false,$delimiter = '…'){
     if(mb_strlen($str) > $length){
-      if(!$words) $str = mb_substr($str,0,$length - mb_strlen($delimiter));
-      else while($str && (mb_strlen($str . $delimiter) > $length)) $str = substr($str,0,strrpos($str,' ') + 1);
+      $str = mb_substr($str,0,$length - mb_strlen($delimiter));
+      if($words && ($i = strrpos($str,' '))) $str = substr($str,0,$i + 1);
       $str .= $delimiter;
     }
     return $str;
@@ -193,6 +205,15 @@ class Str{
     return substr($haystack,0,strlen($needle)) == $needle;
   }
   /**
+   *  Make sure a string starts with a specific value.
+   *  @param string $haystack  Base string.
+   *  @param string $needle  Value to check for at the start of the haystack.
+   *  @return string  Base string with the needle added if not present.
+   */
+  public static function startWith($haystack,$needle){
+    return self::startsWith($haystack,$needle) ? $haystack : $needle . $haystack;
+  }
+  /**
    *  Check if a string ends with a specific value.
    *  @param string $haystack  String to search in.
    *  @param string $needle  Value to look for at the end of the haystack.
@@ -200,6 +221,15 @@ class Str{
    */
   public static function endsWith($haystack,$needle){
     return substr($haystack,-strlen($needle)) == $needle;
+  }
+  /**
+   *  Make sure a string ends with a specific value.
+   *  @param string $haystack  Base string.
+   *  @param string $needle  Value to check for at the end of the haystack.
+   *  @return string  Base string with the needle added if not present.
+   */
+  public static function endWith($haystack,$needle){
+    return self::endsWith($haystack,$needle) ? $haystack : $haystack . $needle;
   }
   /**
    *  Numeric detection.

@@ -89,7 +89,7 @@ class Ftp{
             if($is_dir || !Str::operator($info[$key] = $this->mdtm($entry),$operator,$value)) continue 3;
             break;
           case File::FIND_FILTER_SIZE:
-            if($is_dir || !Str::operator($info[$key] = $this->size($entry),$operator,\Rsi::shorthandBytes($value))) continue 3;
+            if($is_dir || !Str::operator($info[$key] = $this->size($entry),$operator,\Rsi\Number::shorthandBytes($value))) continue 3;
             break;
           case File::FIND_FILTER_FUNC:
             if(!($info[$key] = call_user_func($value,$full,$info))) continue 3;

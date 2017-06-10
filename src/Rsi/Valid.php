@@ -78,6 +78,14 @@ class Valid{
     'VG' => '\\w{4}\\d{16}', //Virgin Islands, British
   ];
   /**
+   *  Check an e-mail address for syntax and host.
+   *  @param string $email  E-mail address.
+   *  @return bool  True if both the e-mail address and the host are valid.
+   */
+  public static function email($email){
+    return filter_var($email,FILTER_VALIDATE_EMAIL) && checkdnsrr(substr(strrchr($email,'@'),1));
+  }
+  /**
    *  Check if an International Bank Account Number (IBAN) is valid.
    *  @param string $value  IBAN (may have extra formatting characters).
    *  @return bool  True when valid.

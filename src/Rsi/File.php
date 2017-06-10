@@ -198,7 +198,7 @@ class File{
             if($is_dir || !Str::operator($info[$key] = filemtime($full),$operator,$value)) continue 3;
             break;
           case self::FIND_FILTER_SIZE:
-            if($is_dir || !Str::operator($info[$key] = filesize($full),$operator,\Rsi::shorthandBytes($value))) continue 3;
+            if($is_dir || !Str::operator($info[$key] = filesize($full),$operator,\Rsi\Number::shorthandBytes($value))) continue 3;
             break;
           case self::FIND_FILTER_FUNC:
             if(!($info[$key] = call_user_func($value,$full,$info))) continue 3;

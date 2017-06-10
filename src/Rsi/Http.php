@@ -24,6 +24,17 @@ class Http{
     return $root;
   }
   /**
+   *  Protocol version.
+   *  @return float  Protocol version (false if unknown).
+   */
+  public static function version(){
+    static $version = null;
+    if($version === null) $version =  ($protocol = Record::get($_SERVER,'SERVER_PROTOCOL')) && ($i = strpos($protocol,'/'))
+      ? (float)substr($protocol,$i + 1)
+      : false;
+    return $version;
+  }
+  /**
    *  Check if the request was made over a secure connection.
    *  @return bool  True if the request was made over a secure connection.
    */
@@ -44,6 +55,15 @@ class Http{
     return $host;
   }
   /**
+   *  Make sure an URL starts with a protocol. Add one if not present.
+   *  @param string $url  Base URL.
+   *  @param string $protocol  Protocol to add if none present.
+   *  @return string  URL with protocol.
+   */
+  public static function ensureProtocol($url,$protocol = 'http'){
+    return strpos($url,'://') ? $url : $protocol . ':' . (substr($url,0,2) == '//' ? '' : '//') . $url;
+  }
+  /**
    *  Check if the maximum POST size was exceeded.
    *  @param int $size  Size of POST.
    *  @param int $max  Maximum size.
@@ -55,7 +75,7 @@ class Http{
       !$_POST &&
       !$_FILES &&
       ($size = Record::get($_SERVER,'CONTENT_LENGTH')) &&
-      ($max = \Rsi::shorthandBytes(ini_get('post_max_size'),false)) &&
+      ($max = \Rsi\Number::shorthandBytes(ini_get('post_max_size'),false)) &&
       ($size > $max);
   }
   /**
@@ -125,7 +145,9 @@ class Http{
    *  @return string
    */
   public static function remoteAddr(){
-    return self::expandAddr(Record::get($_SERVER,'REMOTE_ADDR'));
+    static $remote_addr = null;
+    if($remote_addr === null) $remote_addr = self::expandAddr(Record::get($_SERVER,'REMOTE_ADDR'));
+    return $remote_addr;
   }
   /**
    *  Check if an IP-adres lies within a certain subnet.
@@ -140,6 +162,16 @@ class Http{
       '/^(' . strtr($subnet,['.' => '\.','::' => '(0+:)+0*',':' => '\:0*',';' => '|','*' => '\w+']) . ')$/',
       $remote_addr ?: self::expandAddr(Record::get($_SERVER,'REMOTE_ADDR'))
     );
+  }
+  /**
+   *  Add a push header.
+   *  @param string $src  Location of the resource.
+   *  @param string $type  Type of the resource.
+   *  @return bool  True if push is supported and the header is set, false otherwise.
+   */
+  public static function pushHeader($src,$type){
+    if($push = self::version() >= 2) header("Link: <$src>; rel=preload; as=$type",false);
+    return $push;
   }
   /**
    *  Send download headers.
@@ -195,14 +227,6 @@ class Http{
       case 404: return false;
       default: throw new \Exception("unexpected response ($code): $result");
     }
-  }
-  /**
-   *  Check an e-mail address for syntax and host.
-   *  @param string $email  E-mail address.
-   *  @return bool  True if both the e-mail address and the host are valid.
-   */
-  public static function checkEmail($email){
-    return filter_var($email,FILTER_VALIDATE_EMAIL) && checkdnsrr(substr(strrchr($email,'@'),1));
   }
 
 }

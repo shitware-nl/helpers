@@ -51,6 +51,8 @@ class Image{
    *  @param int $height  Box height.
    *  @param int $options  See IMAGE_SCALE_* constants.
    *  @param int $mode  Scaling mode (see http://php.net/manual/en/function.imagescale.php).
+   *  @return resource  Scaled image resource, or false on failure (including image smaller than requested dimension and
+   *    IMAGE_SCALE_ONLY_SMALLER in options).
    */
   public static function scaleBox($image,$width,$height,$options = 0,$mode = IMG_BILINEAR_FIXED){
     $x_factor = $width / ($orig_width = imagesx($image));
