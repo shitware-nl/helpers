@@ -115,13 +115,36 @@ class File{
     }
   }
   /**
+   *  Write data to a file.
+   *  @param string $filename  File to write to.
+   *  @param mixed $data  Data to save.
+   *  @param int $mode  File mode (not set if empty).
+   *  @param bool $append  Append on true, overwrite on false.
+   *  @return int  Number of bytes written or false on error.
+   */
+  public static function write($filename,$data,$mode = null,$append = false){
+    $result = file_put_contents($filename,$data,$append ? FILE_APPEND : null);
+    if($mode) chmod($filename,$mode);
+    return $result;
+  }
+  /**
+   *  Read the content of a file.
+   *  @param string $filename  File to read from.
+   *  @param mixed $default  Value to return if the file does not exist.
+   *  @return mixed  Data.
+   */
+  public static function read($filename,$default = false){
+    return is_file($filename) ? file_get_contents($filename) : $default;
+  }
+  /**
    *  Serialize data and write it to a file.
    *  @param string $filename  File to write to.
    *  @param mixed $data  Data to serialize and save.
+   *  @param int $mode  File mode (not set if empty).
    *  @return int  Number of bytes written or false on error.
    */
-  public static function serialize($filename,$data){
-    return file_put_contents($filename,serialize($data));
+  public static function serialize($filename,$data,$mode = null){
+    return self::write($filename,serialize($data),$mode);
   }
   /**
    *  Unserialize the content of a file.
@@ -136,11 +159,12 @@ class File{
    *  Encode data to JSON and write it to a file.
    *  @param string $filename  File to write to.
    *  @param mixed $data  Data to decode and save.
+   *  @param int $mode  File mode (not set if empty).
    *  @param int $options  PHP's json_encode options.
    *  @return int  Number of bytes written or false on error.
    */
-  public static function jsonEncode($filename,$data,$options = JSON_PRETTY_PRINT){
-    return file_put_contents($filename,json_encode($data,$options));
+  public static function jsonEncode($filename,$data,$mode = null,$options = JSON_PRETTY_PRINT){
+    return self::write($filename,json_encode($data,$options),$mode);
   }
   /**
    *  Decode the JSON content of a file.

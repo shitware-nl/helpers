@@ -29,7 +29,7 @@ class Http{
    */
   public static function version(){
     static $version = null;
-    if($version === null) $version =  ($protocol = Record::get($_SERVER,'SERVER_PROTOCOL')) && ($i = strpos($protocol,'/'))
+    if($version === null) $version = ($protocol = Record::get($_SERVER,'SERVER_PROTOCOL')) && ($i = strpos($protocol,'/'))
       ? (float)substr($protocol,$i + 1)
       : false;
     return $version;
@@ -154,14 +154,22 @@ class Http{
    *  @param string $subnet  Semicolon separated list of IP-adresses. Within these address an asterisk may be used to indicate a
    *    group of alphanumeric characters. Regular expression notation is also allowed for this (eg '[1-4]', '\\d', '\\w'). Dots
    *    (IPv4) and colons (IPv6) will always be escaped in the regualr expression.
-   *  @param string $remote_addr  The IP-address to check (defaults to $_SERVER['REMOTE_ADDR']).
+   *  @param string $remote_addr  The IP-address to check (defaults to remoteAddr()).
    *  @return bool
    */
   public static function inSubnet($subnet,$remote_addr = null){
     return (bool)preg_match(
       '/^(' . strtr($subnet,['.' => '\.','::' => '(0+:)+0*',':' => '\:0*',';' => '|','*' => '\w+']) . ')$/',
-      $remote_addr ?: self::expandAddr(Record::get($_SERVER,'REMOTE_ADDR'))
+      $remote_addr ?: self::remoteAddr()
     );
+  }
+  /**
+   *  Add a redirection header.
+   *  @param string $url  URL to redirect to.
+   *  @param bool $permanent  True to make the redirection permanent (HTTP code 301; defaul is 302).
+   */
+  public static function redirHeader($url,$permanent = false){
+    header('Location: ' . $url,true,$permanent ? 301 : 302);
   }
   /**
    *  Add a push header.

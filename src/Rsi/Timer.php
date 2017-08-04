@@ -47,7 +47,7 @@ class Timer{
     $times = [];
     foreach($this->times as $id => $time){
       $id_length = max($id_length,strlen($id));
-      $time_length = max($time_length,$times[$id] = number_format($time,$this->decimals));
+      $time_length = max($time_length,strlen($times[$id] = number_format($time,$this->decimals)));
     }
     $text =
       str_pad('ID',$id_length) . ' | ' . str_pad('time [s]',$time_length,' ',STR_PAD_LEFT) . "\n" .

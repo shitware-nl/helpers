@@ -64,12 +64,9 @@ class Record{
    *  @return mixed  Found value, or default value if the key does not exist.
    */
   public static function get($array,$key,$default = null){
-    if(!is_array($key)) $key = [$key];
-    elseif(!$key) return $default;
-    while($key){
-      if(!is_array($array) || !array_key_exists($sub = array_shift($key),$array)) return $default;
-      $array = $array[$sub];
-    }
+    if(!$array || !is_array($array)) return $default;
+    if(!is_array($key)) return array_key_exists($key,$array) ? $array[$key] : $default;
+    while($key) if(!array_key_exists($sub = array_shift($key),$array) || (!is_array($array = $array[$sub]) && $key)) return $default;
     return $array;
   }
   /**
@@ -143,6 +140,31 @@ class Record{
     unset($array[$key]);
   }
   /**
+   *  Flattens a multi-dimensional array.
+   *  @param array $array  Array to flatten.
+   *  @param string $key_glue  Key to combine the keys with (sequential, numerical keys if empty).
+   *  @param string $key_prefix  Prefix for the key.
+   *  @return array  One dimensional array.
+   */
+  public static function flatten($array,$key_glue = null,$key_prefix = null){
+    $result = [];
+    foreach($array as $key => $value)
+      if(is_array($value)) $result = array_merge($result,self::flatten($value,$key_glue,$key_prefix . $key . $key_glue));
+      else $result[$key_glue ? $key_prefix . $key : count($result)] = $value;
+    return $result;
+  }
+  /**
+   *  Brings a flattend array back to its multi-dimensional form.
+   *  @param array $array  One dimensional array.
+   *  @param string $key_glue  Glue with which the keys are combined.
+   *  @return array  Multi-dimensional array.
+   */
+  public static function expand($array,$key_glue){
+    $result = [];
+    foreach($array as $key => $value) self::set($result,explode($key_glue,$key),$value);
+    return $result;
+  }
+  /**
    *  Get the n-th value from an array.
    *  @param array $array  Array to get value from.
    *  @param int $index  Value index (negative = start from end).
@@ -168,6 +190,41 @@ class Record{
    */
   public static function assoc($array){
     return array_values($array) !== $array;
+  }
+  /**
+   *  Splice with keys.
+   *  @param array $array  Input array.
+   *  @param int $offset  Where to start (negative = from end).
+   *  @param int $length  Length of part to remove.
+   *  @param array $replace  Array to replace removed part with.
+   *  @return array
+   */
+  public static function splice($array,$offset,$length = 0,$replace = null){
+    if($offset < 0) $offset += count($array);
+    return array_merge(array_slice($array,0,$offset),$replace ?: [],array_slice($array,$offset + $length));
+  }
+  /**
+   *  Merge arrays while preserving (duplicate) key sequence.
+   *  E.g. ['a' => 5,'b' => 7,'d' => 3] + ['b' => 4,'c' => 2,'d' => 1] returns ['a' => 5,'b' => 4,'c' => 2,'d' => 1].
+   *  @param array $array,... input array(s).
+   *  @return array
+   */
+  public static function merge($array){
+    $result = [];
+    foreach(func_get_args() as $array) if($result){
+      $insert = count($keys = array_keys($result));
+      foreach($keys as $index => $key) if(array_key_exists($key,$array)){
+        $insert = $index;
+        break;
+      }
+      foreach($array as $key => $value) if(in_array($key,$keys)){
+        $result[$key] = $value;
+        $insert = array_search($key,array_keys($result)) + 1;
+      }
+      else $result = self::splice($result,$insert++,0,[$key => $value]);
+    }
+    else $result = $array;
+    return $result;
   }
   /**
    *  Set the length of an array.
@@ -247,15 +304,15 @@ class Record{
    *  @return array  Array of records (key is preserved).
    */
   public static function mergeKey($array,$key_name = null,$value_name = null){
-    $records = [];
+    $result = [];
     foreach($array as $key => $value){
       $record = [];
       if($key_name) $record[$key_name] = $key;
       if($value_name) $record[$value_name] = $value;
       elseif(is_array($value)) $record += $value;
-      $records[$key] = $record;
+      $result[$key] = $record;
     }
-    return $records;
+    return $result;
   }
   /**
    *  Return the values from a single column in the input array.
