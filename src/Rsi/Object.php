@@ -38,7 +38,7 @@ class Object{
     return property_exists($this,$property) || array_key_exists($property,$this->_published);
   }
   /**
-   *  Configureren the object.
+   *  Configure the object.
    *  This will also alter protected and read-only properties. If a specific setter exists it will be used.
    *  @param array $config  Array with the configuration (key-value pairs).
    */

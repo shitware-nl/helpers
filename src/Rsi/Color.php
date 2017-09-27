@@ -38,7 +38,7 @@ class Color{
   public static function toRgb($value){
     if(is_integer($value)) return self::intToRgb($value);
     if(is_string($value)) return self::hexToRgb($value);
-    if(is_array($value) && (count($value) == 3) && (min($value) >= 0) && (max($value) < 256)) return array_vaules($value);
+    if(is_array($value) && (count($value) == 3) && (min($value) >= 0) && (max($value) < 256)) return array_values($value);
     return null;
   }
   /**
@@ -85,6 +85,26 @@ class Color{
       elseif($tint < 0) for($i = 0; $i < 3; $i++) $value[$i] *= 1 + max($tint,-1);
     }
     return $value;
+  }
+  /**
+   *  Create a color palette (rainbow).
+   *  @param int $count  Number of colors in the palette.
+   *  @return array  Array with colors.
+   */
+  public static function palette($count = 12){
+    $palette = [];
+    for($i = 0; $i < $count; $i++){
+      $color = [];
+      for($j = 0; $j < 3; $j++) switch((intval($x = 6 * $i / $count) + 7 - 2 * $j) % 6){
+        case 0:
+        case 1: $color[] = 255; break;
+        case 2: $color[] = round((ceil($x) - $x) * 255) ?: 255; break;
+        case 5: $color[] = round(($x - floor($x)) * 255); break;
+        default: $color[] = 0;
+      }
+      $palette[] = $color;
+    }
+    return $palette;
   }
 
 }

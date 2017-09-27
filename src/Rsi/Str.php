@@ -17,6 +17,8 @@ class Str{
 
   const ATTRIBUTES_PATTERN = '\s+(?<key>\w+)=(\'([^\']*)\'|"([^"]*)"|(\w+))';
 
+  const PASSWORD_CHARS = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
   /**
    *  Returns literally 'true' or 'false'.
    *  @param bool $value
@@ -28,17 +30,13 @@ class Str{
   /**
    *  Generate a random string.
    *  @param int $length  Length of the resulting string.
-   *  @param string $chars  Characters to use. Ranges can be indicated as [{from}-{to}]. Eg '[0-9][a-f]' for the hexadecimal
+   *  @param string $chars  Characters to use. Ranges can be indicated as [{from}-{to}]. E.g. '[0-9][a-f]' for the hexadecimal
    *    range.
    *  @return string
    */
   public static function random($length = 32,$chars = '[a-z][A-Z][0-9]'){
     if(preg_match_all('/\\[(.)\\-(.)\\]/',$chars,$matches,PREG_SET_ORDER))
-      foreach($matches as $match){
-        $full = '';
-        for($c = $match[1]; $c <= $match[2]; $c++) $full .= $c;
-        $chars = str_replace($match[0],$full,$chars);
-      }
+      foreach($matches as list($full,$min,$max)) $chars = str_replace($full,implode(range($min,$max)),$chars);
     $max = strlen($chars) - 1;
     $result = '';
     $random_int = function_exists('random_int');
@@ -61,6 +59,35 @@ class Str{
    */
   public static function urlify($str,$replace = '-'){
     return strtolower(trim(preg_replace('/\\W+/',$replace,self::normalize($str)),$replace));
+  }
+  /**
+   *  Replace ASCII emoji's by their Unicode equivalent.
+   *  @param string $str  String with ASCII emoji's (e.g. ';-)').
+   *  @return string  String with Unicode emoji's (e.g. '😉').
+   */
+  public static function emojify($str){
+    return strtr($str,require(__DIR__ . '/emoji.php'));
+  }
+  /**
+   *  Remove leet-speak (1337 5p33k) from a string.
+   *  @param string $str  String with leet-speak characters.
+   *  @param bool $upper  Replace with uppercase letters.
+   *  @return string  String with leet-speak symbols replaced by their normal letter. This is near from perfect, since '13'
+   *    could be 'LE' or 'B', '1' could be 'I' or 'L', etc).
+   */
+  public static function unleet($str,$upper = false){
+    $leet = require(__DIR__ . '/leet.php');
+    $length = 0;
+    foreach($leet as $chars) $length = max($length,max(array_map('strlen',$chars)));
+    do foreach($leet as $char => $chars) $str = str_replace(
+      array_filter($chars,function($char) use ($length){
+        return strlen($char) == $length;
+      }),
+      $upper ? $char : strtolower($char),
+      $str
+    );
+    while(--$length);
+    return $str;
   }
   /**
    *  Case insesitive string comparison.

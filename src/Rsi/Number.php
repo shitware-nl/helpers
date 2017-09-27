@@ -6,6 +6,23 @@ namespace Rsi;
  *  Helpers for numbers of all sorts.
  */
 class Number{
+
+  /**
+   *  Add a value to a non-decimal number.
+   *  @param string $value  Base value in base $base.
+   *  @param int $add  Decimal value to add to $value.
+   *  @param int $base  The base the $value is in (defaults to 10).
+   *  @param bool $upper  Convert the return value to uppercase (only for $base > 10). Auto-detect on null (defaults to true).
+   *  @return string  Value $value with $add added, in base $base.
+   */
+  public static function add($value,$add = 1,$base = null,$upper = null){
+    if($upper === null) $upper = ($base > 10) && (strtoupper($value) == $value);
+    if($base) $value = base_convert($value,$base,10);
+    $value += $add;
+    if($base) $value = base_convert($value,10,$base);
+    if($upper) $value = strtoupper($value);
+    return $value;
+  }
   /**
    *  Returns the size in bytes for shorthand notations (e.g. 1k -> 1024).
    *  @see http://php.net/manual/en/faq.using.php#faq.using.shorthandbytes

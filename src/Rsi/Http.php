@@ -152,8 +152,8 @@ class Http{
   /**
    *  Check if an IP-adres lies within a certain subnet.
    *  @param string $subnet  Semicolon separated list of IP-adresses. Within these address an asterisk may be used to indicate a
-   *    group of alphanumeric characters. Regular expression notation is also allowed for this (eg '[1-4]', '\\d', '\\w'). Dots
-   *    (IPv4) and colons (IPv6) will always be escaped in the regualr expression.
+   *    group of alphanumeric characters. Regular expression notation is also allowed for this (e.g. '[1-4]', '\\d', '\\w').
+   *    Dots (IPv4) and colons (IPv6) will always be escaped in the regualr expression.
    *  @param string $remote_addr  The IP-address to check (defaults to remoteAddr()).
    *  @return bool
    */
@@ -188,10 +188,10 @@ class Http{
    *  @param int $size  Size of the download (gives user progress indication).
    */
   public static function downloadHeaders($filename,$content_type = null,$size = null){
-    header('Content-Type: ' . ($content_type ?: mime_content_type($filename)));
+    header('Content-Type: ' . ($content_type ?: File::mime($filename)));
     header('Content-Transfer-Encoding: binary');
     header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
-    if($size !== null) header('Content-Length: ' . $size);
+    if(($size !== null) || is_file($filename)) header('Content-Length: ' . ($size === null ? filesize($filename) : $size));
     header('Expires: 0');
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0'); //HTTP/1.1
     header('Pragma: public'); //HTTP/1.0

@@ -182,11 +182,9 @@ class File{
    *  @return string  MIME type.
    */
   public static function mime($filename){
-    if(!function_exists('finfo_open')) return false;
-    $info = finfo_open(FILEINFO_MIME_TYPE);
-    $mime = finfo_file($info,$filename);
-    finfo_close($info);
-    return $mime;
+    if(function_exists('mime_content_type()') && is_file($filename)) return mime_content_type($filename);
+    if(array_key_exists($ext = self::ext($filename),$types = require(__DIR__ . '/mime.php'))) return $types[$ext];
+    return 'application/' . $ext;
   }
   /**
    *  Find and filter files.

@@ -327,6 +327,20 @@ class Record{
     return $result;
   }
   /**
+   *  Group records by a column.
+   *  @param array $array  A multi-dimensional array (record set).
+   *  @param string $column  The column to group by.
+   *  @return array  Records (value; maintaining key association) grouped by column (key).
+   */
+  public static function group($array,$column){
+    $result = [];
+    foreach($array as $key => $record){
+      if(!array_key_exists($group = self::get($record,$column),$result)) $result[$group] = [];
+      $result[$group][$key] = $record;
+    }
+    return $result;
+  }
+  /**
    *  Shuffle an array.
    *  Basicly PHP's shuffle, but then retaining key association (and not altering the input array).
    *  @param array $array  Input array.
@@ -338,6 +352,14 @@ class Record{
     shuffle($keys);
     foreach($keys as $key) $result[$key] = $array[$key];
     return $result;
+  }
+  /**
+   *  Calculate the average of an array.
+   *  @param array $array  Array with numerical values.
+   *  @return float  Average value (false on empty array).
+   */
+  public static function average($array){
+    return ($count = count($array)) ? array_sum($array) / $count : false;
   }
   /**
    *  Return specific keys from an array.
